@@ -6,8 +6,7 @@
     <title>JGVRP 오프너 채용 결과 조회 시스템</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
+            --card-bg: rgba(30, 41, 59, 0.9); /* 배경 이미지와 어우러지도록 살짝 투명도 부여 */
             --text-color: #f8fafc;
             --accent-pass: #22c55e;
             --accent-fail: #ef4444;
@@ -15,7 +14,13 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            /* 루트에 있는 bg.png 배경 적용 설정 */
+            background-image: url('bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            
             color: var(--text-color);
             margin: 0;
             display: flex;
@@ -25,12 +30,14 @@
         }
         .container {
             background-color: var(--card-bg);
+            backdrop-filter: blur(8px); /* 배경이 살짝 비치며 블러 처되는 고급 효과 */
             padding: 2.5rem;
             border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             width: 100%;
             max-width: 450px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         h1 {
             font-size: 1.5rem;
@@ -47,7 +54,7 @@
             padding: 0.75rem;
             border-radius: 0.5rem;
             border: 1px solid #475569;
-            background-color: #0f172a;
+            background-color: rgba(15, 23, 42, 0.8);
             color: #fff;
             font-size: 1rem;
         }
@@ -72,13 +79,46 @@
             margin-top: 1.5rem;
             padding: 1rem;
             border-radius: 0.5rem;
-            background-color: #0f172a;
+            background-color: rgba(15, 23, 42, 0.9);
             display: none;
             text-align: left;
+            animation: fadeIn 0.5s ease;
         }
-        .pass { color: var(--accent-pass); font-weight: bold; }
-        .fail { color: var(--accent-fail); font-weight: bold; }
-        .info-row { margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .congrats {
+            color: var(--accent-pass);
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.2rem;
+            padding: 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 0.5rem;
+            border: 1px solid var(--accent-pass);
+            word-break: keep-all;
+        }
+        .fail-box {
+            color: var(--accent-fail);
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 0.5rem;
+            border: 1px solid var(--accent-fail);
+        }
+        .info-row { 
+            margin-bottom: 0.6rem; 
+            font-size: 0.95rem; 
+            color: #cbd5e1;
+        }
+        .info-row strong {
+            color: #fff;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -86,28 +126,23 @@
 <div class="container">
     <h1>JGVRP 오프너 채용 결과 조회</h1>
     <div class="input-group">
-        <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력">
+        <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력" onkeypress="if(event.keyCode==13) checkResult()">
         <button onclick="checkResult()">조회</button>
     </div>
     <div id="result-box"></div>
 </div>
 
 <script>
-    // 검증된 지원자 데이터베이스 (엑셀 원본 기반)
     const applicants = {
         "yiopcnh": {
-            status: "합격",
             role: "오프너",
             days: "월, 화, 수, 목, 금, 토, 일",
-            time: "오전, 오후",
-            note: "주 7일 풀타임 참여 가능, 적극적 운영 의지"
+            time: "오전, 오후"
         },
         "roo_1332": {
-            status: "최우수 합격",
             role: "오프너 (수석)",
             days: "월, 화, 수, 목, 금, 토, 일",
-            time: "오전, 오후",
-            note: "분쟁 대처 능력 우수 (상호 의견 청취 및 중재)"
+            time: "오전, 오후"
         }
     };
 
@@ -115,25 +150,25 @@
         const inputVal = document.getElementById("nickname").value.trim().toLowerCase();
         const resultBox = document.getElementById("result-box");
         
+        if (!inputVal) return;
+        
         resultBox.style.display = "block";
 
-        // 데이터 검증 및 정확한 정보 매칭 (추측성 데이터 배제)
         let foundKey = Object.keys(applicants).find(k => k.toLowerCase() === inputVal);
 
         if (foundKey) {
             let data = applicants[foundKey];
             resultBox.innerHTML = `
+                <div class="congrats">🎉 축하 합니다. JGVRP 제 1회 오프너 채용에 합격하셨습니다.</div>
                 <div class="info-row"><strong>닉네임:</strong> ${foundKey}</div>
-                <div class="info-row"><strong>판정:</strong> <span class="pass">${data.status}</span></div>
                 <div class="info-row"><strong>배정 포지션:</strong> ${data.role}</div>
                 <div class="info-row"><strong>가능 요일:</strong> ${data.days}</div>
                 <div class="info-row"><strong>가능 시간:</strong> ${data.time}</div>
-                <div class="info-row"><strong>심사 평점:</strong> ${data.note}</div>
             `;
         } else {
             resultBox.innerHTML = `
-                <div class="info-row"><span class="fail">조회 실패</span></div>
-                <div class="info-row">입력하신 닉네임은 합격자 명단에 없거나 알 수 없습니다. 정확한 닉네임을 다시 확인해 주세요.</div>
+                <div class="fail-box">❌ 불합격 또는 미등록</div>
+                <div class="info-row" style="text-align:center;">입력하신 닉네임은 합격자 명단에 존재하지 않습니다.<br>정확한 닉네임을 다시 확인해 주세요.</div>
             `;
         }
     }
