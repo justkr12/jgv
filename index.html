@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JGVRP 오프너 채용 결과 조회 시스템</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-pass: #22c55e;
+            --accent-fail: #ef4444;
+            --primary: #3b82f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #93c5fd;
+        }
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        input {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 1rem;
+        }
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        button {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        #result-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #0f172a;
+            display: none;
+            text-align: left;
+        }
+        .pass { color: var(--accent-pass); font-weight: bold; }
+        .fail { color: var(--accent-fail); font-weight: bold; }
+        .info-row { margin-bottom: 0.5rem; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>JGVRP 오프너 채용 결과 조회</h1>
+    <div class="input-group">
+        <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력">
+        <button onclick="checkResult()">조회</button>
+    </div>
+    <div id="result-box"></div>
+</div>
+
+<script>
+    // 검증된 지원자 데이터베이스 (엑셀 원본 기반)
+    const applicants = {
+        "yiopcnh": {
+            status: "합격",
+            role: "오프너",
+            days: "월, 화, 수, 목, 금, 토, 일",
+            time: "오전, 오후",
+            note: "주 7일 풀타임 참여 가능, 적극적 운영 의지"
+        },
+        "roo_1332": {
+            status: "최우수 합격",
+            role: "오프너 (수석)",
+            days: "월, 화, 수, 목, 금, 토, 일",
+            time: "오전, 오후",
+            note: "분쟁 대처 능력 우수 (상호 의견 청취 및 중재)"
+        }
+    };
+
+    function checkResult() {
+        const inputVal = document.getElementById("nickname").value.trim().toLowerCase();
+        const resultBox = document.getElementById("result-box");
+        
+        resultBox.style.display = "block";
+
+        // 데이터 검증 및 정확한 정보 매칭 (추측성 데이터 배제)
+        let foundKey = Object.keys(applicants).find(k => k.toLowerCase() === inputVal);
+
+        if (foundKey) {
+            let data = applicants[foundKey];
+            resultBox.innerHTML = `
+                <div class="info-row"><strong>닉네임:</strong> ${foundKey}</div>
+                <div class="info-row"><strong>판정:</strong> <span class="pass">${data.status}</span></div>
+                <div class="info-row"><strong>배정 포지션:</strong> ${data.role}</div>
+                <div class="info-row"><strong>가능 요일:</strong> ${data.days}</div>
+                <div class="info-row"><strong>가능 시간:</strong> ${data.time}</div>
+                <div class="info-row"><strong>심사 평점:</strong> ${data.note}</div>
+            `;
+        } else {
+            resultBox.innerHTML = `
+                <div class="info-row"><span class="fail">조회 실패</span></div>
+                <div class="info-row">입력하신 닉네임은 합격자 명단에 없거나 알 수 없습니다. 정확한 닉네임을 다시 확인해 주세요.</div>
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>
