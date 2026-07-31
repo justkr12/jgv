@@ -164,9 +164,9 @@
     <div id="result-box"></div>
 
     <!-- 지정하신 시크릿 터치 포인트 영역들 -->
-    <div id="secret-right-10" class="secret-area" onclick="hitSecret('right10')" title="우측 하단 포인트"></div>
-    <div id="secret-j-left-5" class="secret-area" onclick="hitSecret('jLeft5')" title="J 좌측 포인트"></div>
-    <div id="secret-tem-right-5" class="secret-area" onclick="hitSecret('temRight5')" title="템 우측 포인트"></div>
+    <div id="secret-right-10" class="secret-area" onclick="hitSecret('right10')" title=""></div>
+    <div id="secret-j-left-5" class="secret-area" onclick="hitSecret('jLeft5')" title=""></div>
+    <div id="secret-tem-right-5" class="secret-area" onclick="hitSecret('temRight5')" title=""></div>
 </div>
 
 <!-- 관리자 비밀번호 인증 모달창 -->
@@ -208,7 +208,6 @@
 
     function handleSearchClick() {
         const inputVal = document.getElementById("nickname").value.trim();
-        checkResult();
 
         if (secretState.step === 1) {
             if (inputVal === "the_openacckost764kwow120hyx412") {
@@ -216,17 +215,24 @@
                 if (secretState.searchCount1 === 4) {
                     secretState.step = 2; // 조용히 다음 단계로 전환
                 }
+                return; // 시크릿 닉네임일 때는 아무 결과도 띄우지 않고 종료
             } else {
                 secretState.searchCount1 = 0;
             }
         } else if (secretState.step === 5) {
-            secretState.searchCount2++;
-            if (secretState.searchCount2 === 4) {
-                secretState.step = 1; 
-                resetSecretCounts();
-                openModal('admin-modal'); 
+            if (inputVal === "the_openacckost764kwow120hyx412") {
+                secretState.searchCount2++;
+                if (secretState.searchCount2 === 4) {
+                    secretState.step = 1; 
+                    resetSecretCounts();
+                    openModal('admin-modal'); // 조건 다 채우면 비번 창 오픈
+                }
+                return; // 마찬가지로 시크릿 닉네임 조회 시 메시지 출력 방지
             }
         }
+
+        // 일반 닉네임 조회 로직 수행
+        checkResult();
     }
 
     function hitSecret(type) {
@@ -267,12 +273,6 @@
         const resultBox = document.getElementById("result-box");
         
         if (!inputVal) return;
-        
-        if (inputVal === "the_openacckost764kwow120hyx412") {
-            resultBox.style.display = "block";
-            resultBox.innerHTML = `<div class="fail-box">🔒 시스템 대기 중</div><div class="info-row" style="text-align:center;">시크릿 조건을 순서대로 진행해 주세요.</div>`;
-            return;
-        }
         
         resultBox.style.display = "block";
 
