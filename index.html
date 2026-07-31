@@ -48,7 +48,7 @@
             gap: 0.5rem;
             margin-bottom: 1.5rem;
         }
-        input {
+        input, select {
             flex: 1;
             padding: 0.75rem;
             border-radius: 0.5rem;
@@ -56,8 +56,9 @@
             background-color: rgba(15, 23, 42, 0.8);
             color: #fff;
             font-size: 1rem;
+            box-sizing: border-box;
         }
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
         }
@@ -115,7 +116,7 @@
             color: #fff;
         }
         /* 관리자 모달 스타일 */
-        #admin-modal {
+        #admin-modal, #add-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -130,12 +131,11 @@
             border-radius: 0.75rem;
             border: 1px solid #475569;
             text-align: center;
-            width: 300px;
+            width: 320px;
         }
-        .modal-content input {
+        .modal-content input, .modal-content select {
             width: 100%;
             margin-bottom: 1rem;
-            box-sizing: border-box;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
@@ -160,34 +160,32 @@
         <h3>관리자 인증</h3>
         <input type="password" id="admin-pw" placeholder="비밀번호 입력" onkeypress="if(event.keyCode==13) verifyAdmin()">
         <button onclick="verifyAdmin()">확인</button>
-        <button onclick="closeAdminModal()" style="background-color: #475569; margin-top: 0.5rem;">취소</button>
+        <button onclick="closeModal('admin-modal')" style="background-color: #475569; margin-top: 0.5rem;">취소</button>
+    </div>
+</div>
+
+<!-- 합격자 추가 모달창 -->
+<div id="add-modal">
+    <div class="modal-content">
+        <h3>합격자 추가 관리</h3>
+        <input type="text" id="add-nickname" placeholder="닉네임 입력">
+        <input type="text" id="add-role" placeholder="포지션 입력 (예: WSP)">
+        <button onclick="saveApplicant()">추가 / 수정</button>
+        <button onclick="closeModal('add-modal')" style="background-color: #475569; margin-top: 0.5rem;">닫기</button>
     </div>
 </div>
 
 <script>
-    const applicants = {
-        "yiopcnh": {
-            role: "오프너",
-            days: "월, 화, 수, 목, 금, 토, 일",
-            time: "오전, 오후"
-        },
-        "roo_1332": {
-            role: "오프너 (수석)",
-            days: "월, 화, 수, 목, 금, 토, 일",
-            time: "오전, 오후"
-        },
-        "han_vvvv": {
-            role: "스태프",
-            days: "월, 화, 수, 목, 금, 토, 일",
-            time: "오전, 오후"
-        }
+    let applicants = {
+        "yiopcnh": { role: "오프너" },
+        "roo_1332": { role: "오프너 (수석)" },
+        "han_vvvv": { role: "WSP" }
     };
 
     let searchClickCount = 0;
     let clickTimer = null;
 
     function handleSearchClick() {
-        // 일반 조회 실행
         checkResult();
 
         // 조회 버튼 4번 연속 클릭 감지 로직
@@ -196,11 +194,11 @@
 
         if (searchClickCount >= 4) {
             searchClickCount = 0;
-            openAdminModal();
+            openModal('admin-modal');
         } else {
             clickTimer = setTimeout(() => {
                 searchClickCount = 0;
-            }, 1000); // 1초 안에 4번 눌러야 함
+            }, 1000);
         }
     }
 
@@ -220,8 +218,6 @@
                 <div class="congrats">🎉 축하 합니다. JGVRP 채용에 합격하셨습니다.</div>
                 <div class="info-row"><strong>닉네임:</strong> ${foundKey}</div>
                 <div class="info-row"><strong>배정 포지션:</strong> ${data.role}</div>
-                <div class="info-row"><strong>가능 요일:</strong> ${data.days}</div>
-                <div class="info-row"><strong>가능 시간:</strong> ${data.time}</div>
             `;
         } else {
             resultBox.innerHTML = `
@@ -231,25 +227,42 @@
         }
     }
 
-    function openAdminModal() {
-        document.getElementById("admin-modal").style.display = "flex";
-        document.getElementById("admin-pw").value = "";
-        document.getElementById("admin-pw").focus();
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = "flex";
+        if(modalId === 'admin-modal') {
+            document.getElementById("admin-pw").value = "";
+            document.getElementById("admin-pw").focus();
+        }
     }
 
-    function closeAdminModal() {
-        document.getElementById("admin-modal").style.display = "none";
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
     }
 
     function verifyAdmin() {
         const pw = document.getElementById("admin-pw").value;
         if (pw === "203846jko") {
-            alert("관리자 인증 성공! (이곳에 합격자 추가 기능을 확장할 수 있습니다.)");
-            closeAdminModal();
-            // 추후 합격자 추가를 위한 prompt나 별도 관리 UI로 연결 가능
+            closeModal('admin-modal');
+            openModal('add-modal');
         } else {
             alert("비밀번호가 틀렸습니다.");
         }
+    }
+
+    function saveApplicant() {
+        const nick = document.getElementById("add-nickname").value.trim();
+        const role = document.getElementById("add-role").value.trim();
+
+        if (!nick || !role) {
+            alert("닉네임과 포지션을 모두 입력해주세요.");
+            return;
+        }
+
+        applicants[nick] = { role: role };
+        alert(`[${nick}] 합격자 정보가 성공적으로 등록/수정되었습니다.`);
+        closeModal('add-modal');
+        document.getElementById("add-nickname").value = "";
+        document.getElementById("add-role").value = "";
     }
 </script>
 
