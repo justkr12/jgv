@@ -197,9 +197,8 @@
         "han_vvvv": { role: "WSP" }
     };
 
-    // 시크릿 단계 관리 객체
     let secretState = {
-        step: 1, // 1: 닉네임 입력 + 조회 4번 대기
+        step: 1, 
         searchCount1: 0,
         right10Count: 0,
         jLeft5Count: 0,
@@ -215,19 +214,17 @@
             if (inputVal === "the_openacckost764kwow120hyx412") {
                 secretState.searchCount1++;
                 if (secretState.searchCount1 === 4) {
-                    secretState.step = 2;
-                    alert("1단계 완료: 맨 아래 오른쪽 영역을 10번 클릭하세요.");
+                    secretState.step = 2; // 조용히 다음 단계로 전환
                 }
             } else {
                 secretState.searchCount1 = 0;
             }
         } else if (secretState.step === 5) {
-            // 모든 포인트 클릭 후 최종 조회 버튼 4번
             secretState.searchCount2++;
             if (secretState.searchCount2 === 4) {
-                secretState.step = 1; // 초기화
+                secretState.step = 1; 
                 resetSecretCounts();
-                openModal('admin-modal'); // 최종 관리자 비밀번호 창 오픈!
+                openModal('admin-modal'); 
             }
         }
     }
@@ -238,7 +235,6 @@
                 secretState.right10Count++;
                 if (secretState.right10Count === 10) {
                     secretState.step = 3;
-                    alert("2단계 완료: J글자 왼쪽 영역을 5번 클릭하세요.");
                 }
             }
         } else if (type === 'jLeft5') {
@@ -246,7 +242,6 @@
                 secretState.jLeft5Count++;
                 if (secretState.jLeft5Count === 5) {
                     secretState.step = 4;
-                    alert("3단계 완료: 템 우측 영역을 5번 클릭하세요.");
                 }
             }
         } else if (type === 'temRight5') {
@@ -254,7 +249,6 @@
                 secretState.temRight5Count++;
                 if (secretState.temRight5Count === 5) {
                     secretState.step = 5;
-                    alert("모든 포인트 해제 완료! 마지막으로 조회 버튼을 4번 누르세요.");
                 }
             }
         }
