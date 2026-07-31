@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JGVRP 오프너 채용 결과 조회 시스템</title>
+    <title>JGVRP 채용 결과 시스템</title>
     <style>
         :root {
-            --card-bg: rgba(30, 41, 59, 0.9); /* 배경 이미지와 어우러지도록 살짝 투명도 부여 */
+            --card-bg: rgba(30, 41, 59, 0.9);
             --text-color: #f8fafc;
             --accent-pass: #22c55e;
             --accent-fail: #ef4444;
@@ -14,13 +14,11 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            /* 루트에 있는 bg.png 배경 적용 설정 */
             background-image: url('bg.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
             background-attachment: fixed;
-            
             color: var(--text-color);
             margin: 0;
             display: flex;
@@ -30,7 +28,7 @@
         }
         .container {
             background-color: var(--card-bg);
-            backdrop-filter: blur(8px); /* 배경이 살짝 비치며 블러 처되는 고급 효과 */
+            backdrop-filter: blur(8px);
             padding: 2.5rem;
             border-radius: 1rem;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
@@ -38,6 +36,7 @@
             max-width: 450px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
         h1 {
             font-size: 1.5rem;
@@ -115,6 +114,29 @@
         .info-row strong {
             color: #fff;
         }
+        /* 관리자 모달 스타일 */
+        #admin-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            border: 1px solid #475569;
+            text-align: center;
+            width: 300px;
+        }
+        .modal-content input {
+            width: 100%;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -124,12 +146,22 @@
 <body>
 
 <div class="container">
-    <h1>JGVRP 오프너 채용 결과 조회</h1>
+    <h1>JGVRP 채용 결과 시스템</h1>
     <div class="input-group">
-        <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력" onkeypress="if(event.keyCode==13) checkResult()">
-        <button onclick="checkResult()">조회</button>
+        <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력" onkeypress="if(event.keyCode==13) handleSearchClick()">
+        <button id="search-btn" onclick="handleSearchClick()">조회</button>
     </div>
     <div id="result-box"></div>
+</div>
+
+<!-- 관리자 인증 모달창 -->
+<div id="admin-modal">
+    <div class="modal-content">
+        <h3>관리자 인증</h3>
+        <input type="password" id="admin-pw" placeholder="비밀번호 입력" onkeypress="if(event.keyCode==13) verifyAdmin()">
+        <button onclick="verifyAdmin()">확인</button>
+        <button onclick="closeAdminModal()" style="background-color: #475569; margin-top: 0.5rem;">취소</button>
+    </div>
 </div>
 
 <script>
@@ -143,8 +175,34 @@
             role: "오프너 (수석)",
             days: "월, 화, 수, 목, 금, 토, 일",
             time: "오전, 오후"
+        },
+        "han_vvvv": {
+            role: "스태프",
+            days: "월, 화, 수, 목, 금, 토, 일",
+            time: "오전, 오후"
         }
     };
+
+    let searchClickCount = 0;
+    let clickTimer = null;
+
+    function handleSearchClick() {
+        // 일반 조회 실행
+        checkResult();
+
+        // 조회 버튼 4번 연속 클릭 감지 로직
+        searchClickCount++;
+        clearTimeout(clickTimer);
+
+        if (searchClickCount >= 4) {
+            searchClickCount = 0;
+            openAdminModal();
+        } else {
+            clickTimer = setTimeout(() => {
+                searchClickCount = 0;
+            }, 1000); // 1초 안에 4번 눌러야 함
+        }
+    }
 
     function checkResult() {
         const inputVal = document.getElementById("nickname").value.trim().toLowerCase();
@@ -159,7 +217,7 @@
         if (foundKey) {
             let data = applicants[foundKey];
             resultBox.innerHTML = `
-                <div class="congrats">🎉 축하 합니다. JGVRP 제 1회 오프너 채용에 합격하셨습니다.</div>
+                <div class="congrats">🎉 축하 합니다. JGVRP 채용에 합격하셨습니다.</div>
                 <div class="info-row"><strong>닉네임:</strong> ${foundKey}</div>
                 <div class="info-row"><strong>배정 포지션:</strong> ${data.role}</div>
                 <div class="info-row"><strong>가능 요일:</strong> ${data.days}</div>
@@ -170,6 +228,27 @@
                 <div class="fail-box">❌ 불합격 또는 미등록</div>
                 <div class="info-row" style="text-align:center;">입력하신 닉네임은 합격자 명단에 존재하지 않습니다.<br>정확한 닉네임을 다시 확인해 주세요.</div>
             `;
+        }
+    }
+
+    function openAdminModal() {
+        document.getElementById("admin-modal").style.display = "flex";
+        document.getElementById("admin-pw").value = "";
+        document.getElementById("admin-pw").focus();
+    }
+
+    function closeAdminModal() {
+        document.getElementById("admin-modal").style.display = "none";
+    }
+
+    function verifyAdmin() {
+        const pw = document.getElementById("admin-pw").value;
+        if (pw === "203846jko") {
+            alert("관리자 인증 성공! (이곳에 합격자 추가 기능을 확장할 수 있습니다.)");
+            closeAdminModal();
+            // 추후 합격자 추가를 위한 prompt나 별도 관리 UI로 연결 가능
+        } else {
+            alert("비밀번호가 틀렸습니다.");
         }
     }
 </script>
