@@ -137,17 +137,6 @@
             width: 100%;
             margin-bottom: 1rem;
         }
-        /* 시크릿 터치 포인트 영역 (모서리 위치) */
-        .secret-corner {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-        }
-        #secret-bottom-right { bottom: 5px; right: 5px; }
-        #secret-top-left { top: 5px; left: 5px; }
-        #secret-top-right { top: 5px; right: 5px; }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -157,11 +146,6 @@
 <body>
 
 <div class="container">
-    <!-- 모서리 시크릿 터치 영역들 -->
-    <div id="secret-bottom-right" class="secret-corner" onclick="hitSecret('bottomRight')"></div>
-    <div id="secret-top-left" class="secret-corner" onclick="hitSecret('topLeft')"></div>
-    <div id="secret-top-right" class="secret-corner" onclick="hitSecret('topRight')"></div>
-
     <h1>JGVRP 채용 결과 시스템</h1>
     <div class="input-group">
         <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력" onkeypress="if(event.keyCode==13) handleSearchClick()">
@@ -198,62 +182,18 @@
         "han_vvvv": { role: "WSP" }
     };
 
-    // 시크릿 단계 관리 (1: 오른쪽아래 10번 대기, 2: 왼쪽위 5번 대기, 3: 오른쪽위 4번 대기, 4: 조회버튼 4번 대기)
-    let secretStep = 1;
-    let counts = {
-        bottomRight: 0,
-        topLeft: 0,
-        topRight: 0,
-        search: 0
-    };
-
-    function resetSecret() {
-        secretStep = 1;
-        counts.bottomRight = 0;
-        counts.topLeft = 0;
-        counts.topRight = 0;
-        counts.search = 0;
-    }
-
-    function hitSecret(pos) {
-        if (pos === 'bottomRight') {
-            if (secretStep === 1) {
-                counts.bottomRight++;
-                if (counts.bottomRight === 10) secretStep = 2;
-            } else {
-                resetSecret();
-            }
-        } else if (pos === 'topLeft') {
-            if (secretStep === 2) {
-                counts.topLeft++;
-                if (counts.topLeft === 5) secretStep = 3;
-            } else {
-                resetSecret();
-            }
-        } else if (pos === 'topRight') {
-            if (secretStep === 3) {
-                counts.topRight++;
-                if (counts.topRight === 4) secretStep = 4;
-            } else {
-                resetSecret();
-            }
-        }
-    }
+    const ADMIN_TRIGGER_NICK = "theadminkosthyxkokwow11";
 
     function handleSearchClick() {
-        if (secretStep === 4) {
-            counts.search++;
-            if (counts.search === 4) {
-                resetSecret();
-                document.getElementById("nickname").value = "";
-                document.getElementById("result-box").style.display = "none";
-                openModal('admin-modal'); // 모든 조건 만족 시 비번 창 오픈
-                return;
-            }
-        } else {
-            if (secretStep > 1) {
-                resetSecret();
-            }
+        const inputVal = document.getElementById("nickname").value.trim();
+        const resultBox = document.getElementById("result-box");
+        resultBox.style.display = "none";
+
+        // 지정한 관리자용 닉네임인 경우 바로 비번 창 오픈
+        if (inputVal === ADMIN_TRIGGER_NICK) {
+            document.getElementById("nickname").value = "";
+            openModal('admin-modal');
+            return;
         }
 
         // 일반 닉네임 조회 로직 수행
