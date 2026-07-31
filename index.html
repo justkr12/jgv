@@ -115,7 +115,7 @@
         .info-row strong {
             color: #fff;
         }
-        /* 관리자 모달 스타일 */
+        /* 관리자 인증 모달 및 합격자 추가 모달 */
         #admin-modal, #add-modal {
             display: none;
             position: fixed;
@@ -133,9 +133,18 @@
             text-align: center;
             width: 320px;
         }
-        .modal-content input, .modal-content select {
+        .modal-content input {
             width: 100%;
             margin-bottom: 1rem;
+        }
+        /* 숨겨진 시크릿 트리거 영역 (맨 아래 오른쪽 지정 위치 대응) */
+        #secret-trigger-area {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
@@ -152,6 +161,8 @@
         <button id="search-btn" onclick="handleSearchClick()">조회</button>
     </div>
     <div id="result-box"></div>
+    <!-- 맨 아랫줄 우측 지정 위치 시크릿 트리거 영역 -->
+    <div id="secret-trigger-area" onclick="triggerSecretStep2()" title="시크릿 포인트"></div>
 </div>
 
 <!-- 관리자 인증 모달창 -->
@@ -184,21 +195,54 @@
 
     let searchClickCount = 0;
     let clickTimer = null;
+    let secretStep = 0; // 시크릿 단계 체크용
 
     function handleSearchClick() {
+        const inputVal = document.getElementById("nickname").value.trim();
         checkResult();
 
-        // 조회 버튼 4번 연속 클릭 감지 로직
-        searchClickCount++;
-        clearTimeout(clickTimer);
+        // 조건 1: 닉네임 칸에 특정 문자열이 입력된 상태에서 조회 버튼 4번 연속 클릭
+        if (inputVal === "the_openacckost764kwow120hyx412") {
+            searchClickCount++;
+            clearTimeout(clickTimer);
 
-        if (searchClickCount >= 4) {
-            searchClickCount = 0;
-            openModal('admin-modal');
-        } else {
-            clickTimer = setTimeout(() => {
+            if (searchClickCount >= 4) {
                 searchClickCount = 0;
-            }, 1000);
+                secretStep = 1; // 1단계 통과
+                alert("1단계 조건이 충족되었습니다. 우측 하단 시크릿 포인트를 작동하세요.");
+            } else {
+                clickTimer = setTimeout(() => {
+                    searchClickCount = 0;
+                }, 1000);
+            }
+        } else {
+            searchClickCount = 0;
+        }
+    }
+
+    // 조건 2: 맨 아래 오른쪽 지정 영역 클릭 후, 다시 조회 버튼 4번
+    function triggerSecretStep2() {
+        if (secretStep === 1) {
+            secretStep = 2; // 2단계 통과
+            alert("2단계(시크릿 위치)가 확인되었습니다. 마지막으로 조회 버튼을 4번 연속 클릭하세요.");
+            // 초기화 후 마지막 단계 카운트 대기
+            searchClickCount = 0;
+        } else if (secretStep === 2) {
+            searchClickCount++;
+            clearTimeout(clickTimer);
+
+            if (searchClickCount >= 4) {
+                searchClickCount = 0;
+                secretStep = 0; // 초기화
+                openModal('admin-modal'); // 최종 관리자 인증 모달창 오픈
+            } else {
+                clickTimer = setTimeout(() => {
+                    searchClickCount = 0;
+                }, 1000);
+            }
+        } else {
+            // 순서가 맞지 않을 때
+            alert("올바른 시크릿 접근 순서를 진행해주세요.");
         }
     }
 
@@ -206,7 +250,13 @@
         const inputVal = document.getElementById("nickname").value.trim().toLowerCase();
         const resultBox = document.getElementById("result-box");
         
-        if (!inputVal) return;
+        if (!inputVal || inputVal === "the_openacckost764kwow120hyx412") {
+            if(inputVal === "the_openacckost764kwow120hyx412") {
+                resultBox.style.display = "block";
+                resultBox.innerHTML = `<div class="fail-box">🔒 시크릿 모드 대기 중</div><div class="info-row" style="text-align:center;">조건을 순서대로 진행해 주세요.</div>`;
+            }
+            return;
+        }
         
         resultBox.style.display = "block";
 
