@@ -164,9 +164,9 @@
     <div id="result-box"></div>
 
     <!-- 지정하신 시크릿 터치 포인트 영역들 -->
-    <div id="secret-right-10" class="secret-area" onclick="hitSecret('right10')" title=""></div>
-    <div id="secret-j-left-5" class="secret-area" onclick="hitSecret('jLeft5')" title=""></div>
-    <div id="secret-tem-right-5" class="secret-area" onclick="hitSecret('temRight5')" title=""></div>
+    <div id="secret-right-10" class="secret-area" onclick="hitSecret('right10')"></div>
+    <div id="secret-j-left-5" class="secret-area" onclick="hitSecret('jLeft5')"></div>
+    <div id="secret-tem-right-5" class="secret-area" onclick="hitSecret('temRight5')"></div>
 </div>
 
 <!-- 관리자 비밀번호 인증 모달창 -->
@@ -206,29 +206,42 @@
         searchCount2: 0
     };
 
+    const SECRET_NICK = "the_openacckost764kwow120hyx412";
+
     function handleSearchClick() {
         const inputVal = document.getElementById("nickname").value.trim();
+        const resultBox = document.getElementById("result-box");
+        resultBox.style.display = "none"; // 일반 조회 결과 숨김
 
-        if (secretState.step === 1) {
-            if (inputVal === "the_openacckost764kwow120hyx412") {
+        if (inputVal === SECRET_NICK) {
+            if (secretState.step === 1) {
                 secretState.searchCount1++;
                 if (secretState.searchCount1 === 4) {
-                    secretState.step = 2; // 조용히 다음 단계로 전환
+                    secretState.step = 2; // 다음 단계(우측 하단 10번)로 전환
                 }
-                return; // 시크릿 닉네임일 때는 아무 결과도 띄우지 않고 종료
-            } else {
-                secretState.searchCount1 = 0;
-            }
-        } else if (secretState.step === 5) {
-            if (inputVal === "the_openacckost764kwow120hyx412") {
+                return; 
+            } else if (secretState.step === 5) {
                 secretState.searchCount2++;
                 if (secretState.searchCount2 === 4) {
                     secretState.step = 1; 
                     resetSecretCounts();
-                    openModal('admin-modal'); // 조건 다 채우면 비번 창 오픈
+                    document.getElementById("nickname").value = ""; // 입력창 초기화
+                    openModal('admin-modal'); // 최종 비번 창 오픈
                 }
-                return; // 마찬가지로 시크릿 닉네임 조회 시 메시지 출력 방지
+                return; 
+            } else {
+                // 순서가 안 맞았는데 시크릿 닉네임을 친 경우 리셋 후 다시 1단계부터 시작
+                resetSecretCounts();
+                secretState.step = 1;
+                secretState.searchCount1 = 1;
+                return;
             }
+        }
+
+        // 잘못된 순서에 시크릿 외의 값이 들어오면 카운트 꼬임 방지를 위해 시크릿 단계 초기화
+        if (secretState.step > 1 && secretState.step < 5) {
+            resetSecretCounts();
+            secretState.step = 1;
         }
 
         // 일반 닉네임 조회 로직 수행
@@ -242,6 +255,9 @@
                 if (secretState.right10Count === 10) {
                     secretState.step = 3;
                 }
+            } else {
+                resetSecretCounts();
+                secretState.step = 1;
             }
         } else if (type === 'jLeft5') {
             if (secretState.step === 3) {
@@ -249,13 +265,19 @@
                 if (secretState.jLeft5Count === 5) {
                     secretState.step = 4;
                 }
+            } else {
+                resetSecretCounts();
+                secretState.step = 1;
             }
         } else if (type === 'temRight5') {
             if (secretState.step === 4) {
                 secretState.temRight5Count++;
                 if (secretState.temRight5Count === 5) {
-                    secretState.step = 5;
+                    secretState.step = 5; // 모든 과정 완료, 이제 마지막 조회 4번 대기 상태
                 }
+            } else {
+                resetSecretCounts();
+                secretState.step = 1;
             }
         }
     }
