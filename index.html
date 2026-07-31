@@ -137,16 +137,17 @@
             width: 100%;
             margin-bottom: 1rem;
         }
-        /* 시크릿 터치 영역들 (컨테이너 하단 배치) */
-        .secret-area {
+        /* 시크릿 터치 포인트 영역 (모서리 위치) */
+        .secret-corner {
             position: absolute;
-            bottom: 5px;
+            width: 50px;
+            height: 50px;
             cursor: pointer;
-            height: 30px;
         }
-        #secret-right-10 { right: 5px; width: 60px; }
-        #secret-j-left-5 { left: 20px; width: 60px; }
-        #secret-tem-right-5 { left: 100px; width: 60px; }
+        #secret-bottom-right { bottom: 5px; right: 5px; }
+        #secret-top-left { top: 5px; left: 5px; }
+        #secret-top-right { top: 5px; right: 5px; }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -156,17 +157,17 @@
 <body>
 
 <div class="container">
+    <!-- 모서리 시크릿 터치 영역들 -->
+    <div id="secret-bottom-right" class="secret-corner" onclick="hitSecret('bottomRight')"></div>
+    <div id="secret-top-left" class="secret-corner" onclick="hitSecret('topLeft')"></div>
+    <div id="secret-top-right" class="secret-corner" onclick="hitSecret('topRight')"></div>
+
     <h1>JGVRP 채용 결과 시스템</h1>
     <div class="input-group">
         <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력" onkeypress="if(event.keyCode==13) handleSearchClick()">
         <button id="search-btn" onclick="handleSearchClick()">조회</button>
     </div>
     <div id="result-box"></div>
-
-    <!-- 지정하신 시크릿 터치 포인트 영역들 -->
-    <div id="secret-right-10" class="secret-area" onclick="hitSecret('right10')"></div>
-    <div id="secret-j-left-5" class="secret-area" onclick="hitSecret('jLeft5')"></div>
-    <div id="secret-tem-right-5" class="secret-area" onclick="hitSecret('temRight5')"></div>
 </div>
 
 <!-- 관리자 비밀번호 인증 모달창 -->
@@ -197,97 +198,66 @@
         "han_vvvv": { role: "WSP" }
     };
 
-    let secretState = {
-        step: 1, 
-        searchCount1: 0,
-        right10Count: 0,
-        jLeft5Count: 0,
-        temRight5Count: 0,
-        searchCount2: 0
+    // 시크릿 단계 관리 (1: 오른쪽아래 10번 대기, 2: 왼쪽위 5번 대기, 3: 오른쪽위 4번 대기, 4: 조회버튼 4번 대기)
+    let secretStep = 1;
+    let counts = {
+        bottomRight: 0,
+        topLeft: 0,
+        topRight: 0,
+        search: 0
     };
 
-    const SECRET_NICK = "the_openacckost764kwow120hyx412";
+    function resetSecret() {
+        secretStep = 1;
+        counts.bottomRight = 0;
+        counts.topLeft = 0;
+        counts.topRight = 0;
+        counts.search = 0;
+    }
 
-    function handleSearchClick() {
-        const inputVal = document.getElementById("nickname").value.trim();
-        const resultBox = document.getElementById("result-box");
-        resultBox.style.display = "none"; // 일반 조회 결과 숨김
-
-        if (inputVal === SECRET_NICK) {
-            if (secretState.step === 1) {
-                secretState.searchCount1++;
-                if (secretState.searchCount1 === 4) {
-                    secretState.step = 2; // 다음 단계(우측 하단 10번)로 전환
-                }
-                return; 
-            } else if (secretState.step === 5) {
-                secretState.searchCount2++;
-                if (secretState.searchCount2 === 4) {
-                    secretState.step = 1; 
-                    resetSecretCounts();
-                    document.getElementById("nickname").value = ""; // 입력창 초기화
-                    openModal('admin-modal'); // 최종 비번 창 오픈
-                }
-                return; 
+    function hitSecret(pos) {
+        if (pos === 'bottomRight') {
+            if (secretStep === 1) {
+                counts.bottomRight++;
+                if (counts.bottomRight === 10) secretStep = 2;
             } else {
-                // 순서가 안 맞았는데 시크릿 닉네임을 친 경우 리셋 후 다시 1단계부터 시작
-                resetSecretCounts();
-                secretState.step = 1;
-                secretState.searchCount1 = 1;
-                return;
+                resetSecret();
+            }
+        } else if (pos === 'topLeft') {
+            if (secretStep === 2) {
+                counts.topLeft++;
+                if (counts.topLeft === 5) secretStep = 3;
+            } else {
+                resetSecret();
+            }
+        } else if (pos === 'topRight') {
+            if (secretStep === 3) {
+                counts.topRight++;
+                if (counts.topRight === 4) secretStep = 4;
+            } else {
+                resetSecret();
             }
         }
+    }
 
-        // 잘못된 순서에 시크릿 외의 값이 들어오면 카운트 꼬임 방지를 위해 시크릿 단계 초기화
-        if (secretState.step > 1 && secretState.step < 5) {
-            resetSecretCounts();
-            secretState.step = 1;
+    function handleSearchClick() {
+        if (secretStep === 4) {
+            counts.search++;
+            if (counts.search === 4) {
+                resetSecret();
+                document.getElementById("nickname").value = "";
+                document.getElementById("result-box").style.display = "none";
+                openModal('admin-modal'); // 모든 조건 만족 시 비번 창 오픈
+                return;
+            }
+        } else {
+            if (secretStep > 1) {
+                resetSecret();
+            }
         }
 
         // 일반 닉네임 조회 로직 수행
         checkResult();
-    }
-
-    function hitSecret(type) {
-        if (type === 'right10') {
-            if (secretState.step === 2) {
-                secretState.right10Count++;
-                if (secretState.right10Count === 10) {
-                    secretState.step = 3;
-                }
-            } else {
-                resetSecretCounts();
-                secretState.step = 1;
-            }
-        } else if (type === 'jLeft5') {
-            if (secretState.step === 3) {
-                secretState.jLeft5Count++;
-                if (secretState.jLeft5Count === 5) {
-                    secretState.step = 4;
-                }
-            } else {
-                resetSecretCounts();
-                secretState.step = 1;
-            }
-        } else if (type === 'temRight5') {
-            if (secretState.step === 4) {
-                secretState.temRight5Count++;
-                if (secretState.temRight5Count === 5) {
-                    secretState.step = 5; // 모든 과정 완료, 이제 마지막 조회 4번 대기 상태
-                }
-            } else {
-                resetSecretCounts();
-                secretState.step = 1;
-            }
-        }
-    }
-
-    function resetSecretCounts() {
-        secretState.searchCount1 = 0;
-        secretState.right10Count = 0;
-        secretState.jLeft5Count = 0;
-        secretState.temRight5Count = 0;
-        secretState.searchCount2 = 0;
     }
 
     function checkResult() {
