@@ -1,267 +1,446 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JGVRP 채용 결과 시스템</title>
-    <style>
-        :root {
-            --card-bg: rgba(30, 41, 59, 0.9);
-            --text-color: #f8fafc;
-            --accent-pass: #22c55e;
-            --accent-fail: #ef4444;
-            --primary: #3b82f6;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('bg.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            background-color: var(--card-bg);
-            backdrop-filter: blur(8px);
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-            color: #93c5fd;
-        }
-        .input-group {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        input, select {
-            flex: 1;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #475569;
-            background-color: rgba(15, 23, 42, 0.8);
-            color: #fff;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        button {
-            padding: 0.75rem 1.25rem;
-            border: none;
-            border-radius: 0.5rem;
-            background-color: var(--primary);
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background-color: #2563eb;
-        }
-        #result-box {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: rgba(15, 23, 42, 0.9);
-            display: none;
-            text-align: left;
-            animation: fadeIn 0.5s ease;
-        }
-        .congrats {
-            color: var(--accent-pass);
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 1.2rem;
-            padding: 1rem;
-            background: rgba(34, 197, 94, 0.1);
-            border-radius: 0.5rem;
-            border: 1px solid var(--accent-pass);
-            word-break: keep-all;
-        }
-        .fail-box {
-            color: var(--accent-fail);
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 1rem;
-            padding: 1rem;
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 0.5rem;
-            border: 1px solid var(--accent-fail);
-        }
-        .info-row { 
-            margin-bottom: 0.6rem; 
-            font-size: 0.95rem; 
-            color: #cbd5e1;
-        }
-        .info-row strong {
-            color: #fff;
-        }
-        /* 모달 스타일 */
-        #admin-modal, #add-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: #1e293b;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            border: 1px solid #475569;
-            text-align: center;
-            width: 320px;
-        }
-        .modal-content input {
-            width: 100%;
-            margin-bottom: 1rem;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JGVRP 채용 결과 시스템</title>
+
+<style>
+:root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --blue: #2563eb;
+    --green: #16a34a;
+    --red: #dc2626;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family:
+        "Pretendard",
+        "Noto Sans KR",
+        Arial,
+        sans-serif;
+    background:
+        linear-gradient(
+            135deg,
+            #eff6ff,
+            #f8fafc 45%,
+            #eef2ff
+        );
+    color: var(--text);
+}
+
+.container {
+    width: calc(100% - 32px);
+    max-width: 470px;
+    background: var(--card);
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 38px;
+    box-shadow:
+        0 20px 50px rgba(15, 23, 42, 0.08);
+}
+
+.logo {
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+    border-radius: 14px;
+    background: #eff6ff;
+    color: var(--blue);
+    font-size: 24px;
+    font-weight: 800;
+}
+
+h1 {
+    margin: 0;
+    text-align: center;
+    font-size: 23px;
+}
+
+.subtitle {
+    margin: 9px 0 28px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.search {
+    display: flex;
+    gap: 9px;
+}
+
+input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    outline: none;
+    font-size: 15px;
+}
+
+input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+button {
+    border: 0;
+    border-radius: 10px;
+    padding: 0 19px;
+    background: var(--blue);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+#result {
+    margin-top: 20px;
+}
+
+.result {
+    padding: 18px;
+    border-radius: 12px;
+}
+
+.pass {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+}
+
+.fail {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+}
+
+.result-title {
+    font-weight: 800;
+    margin-bottom: 13px;
+}
+
+.pass .result-title {
+    color: var(--green);
+}
+
+.fail .result-title {
+    color: var(--red);
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(148,163,184,.2);
+    font-size: 14px;
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+.label {
+    color: var(--muted);
+}
+
+.footer {
+    margin-top: 25px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.admin-button {
+    margin-top: 14px;
+    width: 100%;
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    padding: 10px;
+}
+
+.admin-button:hover {
+    background: #f1f5f9;
+    color: #334155;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, .45);
+    padding: 20px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 360px;
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 25px 70px rgba(0,0,0,.2);
+}
+
+.modal-box h2 {
+    margin-top: 0;
+    font-size: 19px;
+}
+
+.modal-box button {
+    width: 100%;
+    height: 45px;
+    margin-top: 10px;
+}
+
+.cancel {
+    background: #e2e8f0 !important;
+    color: #334155 !important;
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-    <h1>JGVRP 채용 결과 시스템</h1>
-    <div class="input-group">
-        <input type="text" id="nickname" placeholder="카톡/디코 닉네임 입력" onkeypress="if(event.keyCode==13) handleSearchClick()">
-        <button id="search-btn" onclick="handleSearchClick()">조회</button>
+
+    <div class="logo">J</div>
+
+    <h1>JGVRP 채용 결과</h1>
+
+    <div class="subtitle">
+        카톡 또는 디스코드 닉네임을 입력해주세요.
     </div>
-    <div id="result-box"></div>
+
+    <div class="search">
+        <input
+            id="nickname"
+            type="text"
+            placeholder="닉네임 입력"
+            autocomplete="off"
+        >
+
+        <button onclick="searchApplicant()">
+            조회
+        </button>
+    </div>
+
+    <div id="result"></div>
+
+    <button
+        class="admin-button"
+        onclick="openAdminLogin()"
+    >
+        관리자
+    </button>
+
+    <div class="footer">
+        JGVRP Recruitment System
+    </div>
 </div>
 
-<!-- 관리자 비밀번호 인증 모달창 -->
-<div id="admin-modal">
-    <div class="modal-content">
-        <h3>관리자 인증</h3>
-        <input type="password" id="admin-pw" placeholder="비밀번호 입력" onkeypress="if(event.keyCode==13) verifyAdmin()">
-        <button onclick="verifyAdmin()">확인</button>
-        <button onclick="closeModal('admin-modal')" style="background-color: #475569; margin-top: 0.5rem;">취소</button>
-    </div>
-</div>
+<div class="modal" id="adminModal">
+    <div class="modal-box">
 
-<!-- 합격자 추가 관리 모달창 -->
-<div id="add-modal">
-    <div class="modal-content">
-        <h3>합격자 추가 관리</h3>
-        <input type="text" id="add-nickname" placeholder="닉네임 입력">
-        <input type="text" id="add-role" placeholder="포지션 입력 (예: WSP)">
-        <button onclick="saveApplicant()">추가 / 수정</button>
-        <button onclick="closeModal('add-modal')" style="background-color: #475569; margin-top: 0.5rem;">닫기</button>
+        <h2>관리자 로그인</h2>
+
+        <p style="color:#64748b;font-size:13px;">
+            관리자 비밀번호를 입력하세요.
+        </p>
+
+        <input
+            id="adminPassword"
+            type="password"
+            placeholder="관리자 비밀번호"
+            autocomplete="current-password"
+        >
+
+        <button onclick="adminLogin()">
+            로그인
+        </button>
+
+        <button
+            class="cancel"
+            onclick="closeAdminLogin()"
+        >
+            취소
+        </button>
+
     </div>
 </div>
 
 <script>
-    let applicants = {
-        "yiopcnh": { role: "오프너" },
-        "roo_1332": { role: "오프너 (수석)" },
-        "han_vvvv": { role: "WSP" }
-    };
+const nicknameInput =
+    document.getElementById("nickname");
 
-    const ADMIN_TRIGGER_NICK = "theadminkosthyxkokwow11";
+nicknameInput.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        searchApplicant();
+    }
+});
 
-    function handleSearchClick() {
-        const inputVal = document.getElementById("nickname").value.trim();
-        const resultBox = document.getElementById("result-box");
-        resultBox.style.display = "none";
+async function searchApplicant() {
+    const nickname =
+        nicknameInput.value.trim();
 
-        // 지정한 관리자용 닉네임인 경우 바로 비번 창 오픈
-        if (inputVal === ADMIN_TRIGGER_NICK) {
-            document.getElementById("nickname").value = "";
-            openModal('admin-modal');
+    const result =
+        document.getElementById("result");
+
+    if (!nickname) {
+        result.textContent =
+            "닉네임을 입력해주세요.";
+        return;
+    }
+
+    result.textContent = "조회 중...";
+
+    try {
+        const response = await fetch(
+            `/api/applicant?nickname=${encodeURIComponent(nickname)}`
+        );
+
+        const data = await response.json();
+
+        if (data.found) {
+            result.innerHTML = `
+                <div class="result pass">
+                    <div class="result-title">
+                        🎉 채용에 합격하셨습니다.
+                    </div>
+
+                    <div class="row">
+                        <span class="label">닉네임</span>
+                        <strong>${escapeHTML(data.nickname)}</strong>
+                    </div>
+
+                    <div class="row">
+                        <span class="label">배정 포지션</span>
+                        <strong>${escapeHTML(data.role)}</strong>
+                    </div>
+                </div>
+            `;
+        } else {
+            result.innerHTML = `
+                <div class="result fail">
+                    <div class="result-title">
+                        ❌ 불합격 또는 미등록
+                    </div>
+
+                    <div style="font-size:14px;color:#64748b;">
+                        입력하신 닉네임은 합격자 명단에
+                        존재하지 않습니다.
+                    </div>
+                </div>
+            `;
+        }
+
+    } catch (error) {
+        result.textContent =
+            "서버 연결에 실패했습니다.";
+    }
+}
+
+function openAdminLogin() {
+    document
+        .getElementById("adminModal")
+        .classList.add("show");
+
+    document
+        .getElementById("adminPassword")
+        .focus();
+}
+
+function closeAdminLogin() {
+    document
+        .getElementById("adminModal")
+        .classList.remove("show");
+}
+
+async function adminLogin() {
+    const password =
+        document
+            .getElementById("adminPassword")
+            .value;
+
+    if (!password) {
+        alert("비밀번호를 입력해주세요.");
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            "/api/admin/login",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+                body: JSON.stringify({
+                    password
+                })
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+            alert(data.message);
             return;
         }
 
-        // 일반 닉네임 조회 로직 수행
-        checkResult();
+        // 관리자 토큰은 관리자 탭에서만 사용
+        sessionStorage.setItem(
+            "adminToken",
+            data.token
+        );
+
+        // 새 탭으로 관리자 페이지
+        window.open(
+            "/admin",
+            "_blank",
+            "noopener,noreferrer"
+        );
+
+        closeAdminLogin();
+
+    } catch {
+        alert("서버 연결에 실패했습니다.");
     }
+}
 
-    function checkResult() {
-        const inputVal = document.getElementById("nickname").value.trim().toLowerCase();
-        const resultBox = document.getElementById("result-box");
-        
-        if (!inputVal) return;
-        
-        resultBox.style.display = "block";
-
-        let foundKey = Object.keys(applicants).find(k => k.toLowerCase() === inputVal);
-
-        if (foundKey) {
-            let data = applicants[foundKey];
-            resultBox.innerHTML = `
-                <div class="congrats">🎉 축하 합니다. JGVRP 채용에 합격하셨습니다.</div>
-                <div class="info-row"><strong>닉네임:</strong> ${foundKey}</div>
-                <div class="info-row"><strong>배정 포지션:</strong> ${data.role}</div>
-            `;
-        } else {
-            resultBox.innerHTML = `
-                <div class="fail-box">❌ 불합격 또는 미등록</div>
-                <div class="info-row" style="text-align:center;">입력하신 닉네임은 합격자 명단에 존재하지 않습니다.<br>정확한 닉네임을 다시 확인해 주세요.</div>
-            `;
-        }
-    }
-
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = "flex";
-        if(modalId === 'admin-modal') {
-            document.getElementById("admin-pw").value = "";
-            document.getElementById("admin-pw").focus();
-        }
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
-    }
-
-    function verifyAdmin() {
-        const pw = document.getElementById("admin-pw").value;
-        if (pw === "203846jko") {
-            closeModal('admin-modal');
-            openModal('add-modal');
-        } else {
-            alert("비밀번호가 틀렸습니다.");
-        }
-    }
-
-    function saveApplicant() {
-        const nick = document.getElementById("add-nickname").value.trim();
-        const role = document.getElementById("add-role").value.trim();
-
-        if (!nick || !role) {
-            alert("닉네임과 포지션을 모두 입력해주세요.");
-            return;
-        }
-
-        applicants[nick] = { role: role };
-        alert(`[${nick}] 합격자 정보가 성공적으로 등록/수정되었습니다.`);
-        closeModal('add-modal');
-        document.getElementById("add-nickname").value = "";
-        document.getElementById("add-role").value = "";
-    }
+function escapeHTML(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
 </script>
 
 </body>
