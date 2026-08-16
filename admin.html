@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>JGVRP 관리자 페이지</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --background: #f8fafc;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #16a34a;
+}
+
+body {
+    margin: 0;
+    font-family:
+        "Pretendard",
+        "Noto Sans KR",
+        Arial,
+        sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+.layout {
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Sidebar */
+
+.sidebar {
+    width: 245px;
+    position: fixed;
+    inset: 0 auto 0 0;
+    background: white;
+    border-right: 1px solid var(--border);
+    padding: 24px 15px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 12px;
+    margin-bottom: 35px;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.logo-icon {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--blue-light);
+    color: var(--blue);
+    border-radius: 9px;
+}
+
+.menu-title {
+    padding: 0 12px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    padding: 11px 12px;
+    border-radius: 8px;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.menu button.active {
+    background: var(--blue-light);
+    color: var(--blue);
+    font-weight: 700;
+}
+
+.menu button:hover {
+    background: #f8fafc;
+}
+
+/* Main */
+
+.main {
+    width: calc(100% - 245px);
+    margin-left: 245px;
+}
+
+/* Header */
+
+.header {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 35px;
+}
+
+.header-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.admin-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+/* Content */
+
+.content {
+    padding: 35px;
+    max-width: 1400px;
+}
+
+.page-title {
+    margin-bottom: 25px;
+}
+
+.page-title h1 {
+    margin: 0 0 7px;
+    font-size: 24px;
+}
+
+.page-title p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* Stats */
+
+.stats {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-value {
+    margin-top: 8px;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+/* Table card */
+
+.card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.search {
+    width: 300px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+}
+
+.search:focus {
+    border-color: var(--blue);
+}
+
+.btn {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.btn-primary {
+    background: var(--blue);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-edit {
+    background: #eff6ff;
+    color: var(--blue);
+}
+
+.btn-delete {
+    background: #fef2f2;
+    color: var(--red);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f8fafc;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: left;
+    padding: 13px 20px;
+    white-space: nowrap;
+}
+
+td {
+    padding: 15px 20px;
+    border-top: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+.nickname {
+    font-weight: 700;
+}
+
+.role {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: #f0fdf4;
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.actions {
+    display: flex;
+    gap: 7px;
+}
+
+.empty {
+    padding: 50px;
+    text-align: center;
+    color: var(--muted);
+}
+
+/* Modal */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, .45);
+    z-index: 100;
+    padding: 20px;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-box {
+    width: 100%;
+    max-width: 430px;
+    background: white;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 25px 80px rgba(0,0,0,.2);
+}
+
+.modal-box h2 {
+    margin-top: 0;
+    font-size: 19px;
+}
+
+.form-group {
+    margin-bottom: 17px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: var(--blue);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+@media (max-width: 800px) {
+
+    .sidebar {
+        width: 65px;
+        padding: 20px 8px;
+    }
+
+    .logo span,
+    .menu-title {
+        display: none;
+    }
+
+    .menu button {
+        text-align: center;
+        font-size: 0;
+    }
+
+    .menu button::first-letter {
+        font-size: 18px;
+    }
+
+    .main {
+        width: calc(100% - 65px);
+        margin-left: 65px;
+    }
+
+    .header {
+        padding: 0 20px;
+    }
+
+    .content {
+        padding: 20px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search {
+        width: 100%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">J</div>
+            <span>JGVRP ADMIN</span>
+        </div>
+
+        <div class="menu-title">
+            MANAGEMENT
+        </div>
+
+        <div class="menu">
+            <button class="active">
+                📋 합격자 관리
+            </button>
+
+            <button onclick="openAddModal()">
+                ➕ 합격자 추가
+            </button>
+
+            <button onclick="logout()">
+                🚪 로그아웃
+            </button>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="header">
+
+            <div class="header-title">
+                관리자 대시보드
+            </div>
+
+            <div class="admin-info">
+                관리자
+                <div class="avatar">A</div>
+            </div>
+
+        </header>
+
+        <section class="content">
+
+            <div class="page-title">
+                <h1>합격자 관리</h1>
+                <p>
+                    JGVRP 채용 합격자 명단을 관리합니다.
+                </p>
+            </div>
+
+            <div class="stats">
+
+                <div class="stat-card">
+                    <div class="stat-label">
+                        전체 합격자
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="totalCount"
+                    >
+                        -
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">
+                        등록된 포지션
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        id="roleCount"
+                    >
+                        -
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">
+                        시스템 상태
+                    </div>
+
+                    <div
+                        class="stat-value"
+                        style="
+                            color:#16a34a;
+                            font-size:20px;
+                        "
+                    >
+                        정상
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <input
+                        id="searchInput"
+                        class="search"
+                        type="text"
+                        placeholder="닉네임 또는 포지션 검색..."
+                        oninput="renderTable()"
+                    >
+
+                    <button
+                        class="btn btn-primary"
+                        onclick="openAddModal()"
+                    >
+                        + 합격자 추가
+                    </button>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>닉네임</th>
+                                <th>포지션</th>
+                                <th>관리</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="tableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- 추가 / 수정 Modal -->
+
+<div class="modal" id="applicantModal">
+
+    <div class="modal-box">
+
+        <h2 id="modalTitle">
+            합격자 추가
+        </h2>
+
+        <div class="form-group">
+
+            <label>닉네임</label>
+
+            <input
+                id="nicknameInput"
+                type="text"
+                placeholder="예: yiopcnh"
+            >
+
+        </div>
+
+        <div class="form-group">
+
+            <label>포지션</label>
+
+            <input
+                id="roleInput"
+                type="text"
+                placeholder="예: WSP"
+            >
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn btn-cancel"
+                onclick="closeModal()"
+            >
+                취소
+            </button>
+
+            <button
+                class="btn btn-primary"
+                onclick="saveApplicant()"
+            >
+                저장
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+let applicants = [];
+let editingNickname = null;
+
+function getToken() {
+    return sessionStorage.getItem("adminToken");
+}
+
+function authHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "Authorization":
+            "Bearer " + getToken()
+    };
+}
+
+async function loadApplicants() {
+
+    try {
+
+        const response = await fetch(
+            "/api/admin/applicants",
+            {
+                headers: authHeaders()
+            }
+        );
+
+        if (response.status === 401) {
+            alert("관리자 인증이 만료되었습니다.");
+            window.location.href = "/";
+            return;
+        }
+
+        const data = await response.json();
+
+        applicants = data.applicants || [];
+
+        updateStats();
+        renderTable();
+
+    } catch (error) {
+
+        alert(
+            "합격자 정보를 불러오지 못했습니다."
+        );
+    }
+}
+
+function updateStats() {
+
+    document.getElementById("totalCount")
+        .textContent = applicants.length;
+
+    const roles = new Set(
+        applicants.map(item => item.role)
+    );
+
+    document.getElementById("roleCount")
+        .textContent = roles.size;
+}
+
+function renderTable() {
+
+    const tbody =
+        document.getElementById("tableBody");
+
+    const keyword =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const filtered =
+        applicants.filter(item => {
+
+            return (
+                item.nickname
+                    .toLowerCase()
+                    .includes(keyword) ||
+
+                item.role
+                    .toLowerCase()
+                    .includes(keyword)
+            );
+        });
+
+    tbody.innerHTML = "";
+
+    if (filtered.length === 0) {
+
+        const tr =
+            document.createElement("tr");
+
+        tr.innerHTML = `
+            <td colspan="3">
+                <div class="empty">
+                    등록된 합격자가 없습니다.
+                </div>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+
+        return;
+    }
+
+    filtered.forEach(item => {
+
+        const tr =
+            document.createElement("tr");
+
+        const nicknameTd =
+            document.createElement("td");
+
+        nicknameTd.className = "nickname";
+        nicknameTd.textContent =
+            item.nickname;
+
+        const roleTd =
+            document.createElement("td");
+
+        const role =
+            document.createElement("span");
+
+        role.className = "role";
+        role.textContent = item.role;
+
+        roleTd.appendChild(role);
+
+        const actionTd =
+            document.createElement("td");
+
+        const actions =
+            document.createElement("div");
+
+        actions.className = "actions";
+
+        const editButton =
+            document.createElement("button");
+
+        editButton.className =
+            "btn btn-edit";
+
+        editButton.textContent = "수정";
+
+        editButton.onclick = () =>
+            openEditModal(item.nickname);
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "btn btn-delete";
+
+        deleteButton.textContent = "삭제";
+
+        deleteButton.onclick = () =>
+            deleteApplicant(item.nickname);
+
+        actions.appendChild(editButton);
+        actions.appendChild(deleteButton);
+
+        actionTd.appendChild(actions);
+
+        tr.appendChild(nicknameTd);
+        tr.appendChild(roleTd);
+        tr.appendChild(actionTd);
+
+        tbody.appendChild(tr);
+    });
+}
+
+function openAddModal() {
+
+    editingNickname = null;
+
+    document.getElementById("modalTitle")
+        .textContent = "합격자 추가";
+
+    document.getElementById("nicknameInput")
+        .value = "";
+
+    document.getElementById("roleInput")
+        .value = "";
+
+    document.getElementById("nicknameInput")
+        .disabled = false;
+
+    document.getElementById("applicantModal")
+        .classList.add("show");
+}
+
+function openEditModal(nickname) {
+
+    const applicant =
+        applicants.find(
+            item => item.nickname === nickname
+        );
+
+    if (!applicant) return;
+
+    editingNickname = nickname;
+
+    document.getElementById("modalTitle")
+        .textContent = "합격자 수정";
+
+    document.getElementById("nicknameInput")
+        .value = applicant.nickname;
+
+    document.getElementById("roleInput")
+        .value = applicant.role;
+
+    // 닉네임은 수정하지 못하게 함
+    document.getElementById("nicknameInput")
+        .disabled = true;
+
+    document.getElementById("applicantModal")
+        .classList.add("show");
+}
+
+function closeModal() {
+
+    document.getElementById("applicantModal")
+        .classList.remove("show");
+}
+
+async function saveApplicant() {
+
+    const nickname =
+        document.getElementById("nicknameInput")
+            .value
+            .trim();
+
+    const role =
+        document.getElementById("roleInput")
+            .value
+            .trim();
+
+    if (!nickname || !role) {
+        alert(
+            "닉네임과 포지션을 입력해주세요."
+        );
+        return;
+    }
+
+    try {
+
+        let response;
+
+        if (editingNickname) {
+
+            response = await fetch(
+                `/api/admin/applicants/${encodeURIComponent(editingNickname)}`,
+                {
+                    method: "PUT",
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        role
+                    })
+                }
+            );
+
+        } else {
+
+            response = await fetch(
+                "/api/admin/applicants",
+                {
+                    method: "POST",
+                    headers: authHeaders(),
+                    body: JSON.stringify({
+                        nickname,
+                        role
+                    })
+                }
+            );
+        }
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+
+        closeModal();
+
+        await loadApplicants();
+
+        alert(
+            editingNickname
+                ? "포지션이 수정되었습니다."
+                : "합격자가 추가되었습니다."
+        );
+
+    } catch {
+
+        alert(
+            "서버 연결에 실패했습니다."
+        );
+    }
+}
+
+async function deleteApplicant(nickname) {
+
+    const confirmed =
+        confirm(
+            `"${nickname}" 합격자를 정말 삭제하시겠습니까?\n\n삭제하면 합격자 조회에서도 사라집니다.`
+        );
+
+    if (!confirmed) return;
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/admin/applicants/${encodeURIComponent(nickname)}`,
+                {
+                    method: "DELETE",
+                    headers: authHeaders()
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (!response.ok) {
+            alert(data.message);
+            return;
+        }
+
+        await loadApplicants();
+
+        alert(
+            "합격자가 삭제되었습니다."
+        );
+
+    } catch {
+
+        alert(
+            "삭제 중 오류가 발생했습니다."
+        );
+    }
+}
+
+async function logout() {
+
+    try {
+
+        await fetch(
+            "/api/admin/logout",
+            {
+                method: "POST",
+                headers: authHeaders()
+            }
+        );
+
+    } finally {
+
+        sessionStorage.removeItem(
+            "adminToken"
+        );
+
+        window.location.href = "/";
+    }
+}
+
+loadApplicants();
+</script>
+
+</body>
+</html>
